@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="TODO placeholder: Round Tortoise">
+  <rect width="1200" height="900" fill="#C9B8A6"/>
+  <circle cx="600" cy="450" r="220" fill="none" stroke="#5A2E1F" stroke-width="8"/>
+  <circle cx="600" cy="450" r="160" fill="#EDE6DC"/>
+  <text x="600" y="440" text-anchor="middle" fill="#5A2E1F" font-family="Georgia, serif" font-size="36">TODO — Round Tortoise</text>
+  <text x="600" y="490" text-anchor="middle" fill="#1A1A1A" font-family="Arial, sans-serif" font-size="20">Replace with product photo</text>
+</svg>

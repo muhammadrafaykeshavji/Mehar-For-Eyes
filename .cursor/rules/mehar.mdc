@@ -1,0 +1,23 @@
+---
+alwaysApply: true
+---
+Project: Mehar for Eyes, a showcase website for an established optical business in Pakistan. Not ecommerce yet. All orders happen via WhatsApp. Ecommerce will be added later, so keep product data separate from UI.
+
+Stack: Next.js App Router, TypeScript, Tailwind CSS, next/image. No UI component libraries unless I ask. Backend will be a separate Go service in /backend (chi, pgx, sqlc, golang-migrate, Postgres), built later.
+
+Design rules:
+- Warm off-white background (#FAF7F2), near-black text (#1A1A1A), one accent color (#5A2E1F). No gradients, no glassmorphism, no purple/blue.
+- Fonts via next/font: Fraunces (headings), DM Sans (body).
+- Generous whitespace, large product imagery, hairline borders (1px), subtle motion only (fade/translate on scroll, 200-300ms).
+- No emojis in UI. No lorem ipsum. No generic marketing copy like "Welcome to" or "Discover the best". Write short, specific, human copy.
+- Mobile first. Must look correct at 360px width.
+- Accessible: alt text on all images, visible focus states, contrast AA.
+- Performance: all images through next/image with sizes, lazy load below the fold.
+
+Data rules:
+- For now, products come only from /data/products.ts, a dev stub. UI never hardcodes product info. All data access goes through functions in /lib/products.ts so the source can be swapped to the Go API later without touching components.
+- Placeholder images live in /public/placeholders. Never hotlink external image URLs.
+- WhatsApp link logic lives only in /lib/whatsapp.ts.
+
+Code rules:
+- Give full files, not snippets.
