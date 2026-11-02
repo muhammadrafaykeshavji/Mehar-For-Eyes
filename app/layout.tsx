@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import LocalBusinessJsonLd from "@/components/LocalBusinessJsonLd";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -17,12 +21,18 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Mehar for Eyes",
-    template: "%s · Mehar for Eyes",
+    default: "Mehar for Eyes | Eyewear and optical shop",
+    template: "%s | Mehar for Eyes",
   },
-  description:
-    "Optical frames and eyewear from Mehar for Eyes. Browse the collection and order on WhatsApp.",
+  description: siteConfig.description,
+  openGraph: {
+    siteName: siteConfig.name,
+    type: "website",
+    locale: "en_PK",
+    // TODO — add an og image when real shop photos exist
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,6 +45,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <LocalBusinessJsonLd />
+        <Suspense fallback={null}>
+          <WhatsAppFloat />
+        </Suspense>
       </body>
     </html>
   );

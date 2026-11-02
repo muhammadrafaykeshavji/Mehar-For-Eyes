@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Suspense } from "react";
 import { CollectionFilters } from "@/components/CollectionFilters";
 import { CollectionProductCard } from "@/components/CollectionProductCard";
@@ -11,13 +11,13 @@ import { getFilterOptions, getProducts } from "@/lib/products";
 
 export const metadata = {
   title: "Collection",
-  description: "Browse frames currently available at Mehar for Eyes.",
+  description: "Browse eyeglass frames, sunglasses and kids eyewear from Mehar for Eyes. Order on WhatsApp.",
 };
 
 function CollectionFallback() {
   return (
     <div className="mt-8 border-t border-foreground/10 pt-8">
-      <p className="text-sm text-foreground/60">Loading frames…</p>
+      <p className="text-sm text-foreground/60">Loading framesâ€¦</p>
     </div>
   );
 }
