@@ -48,7 +48,7 @@ jobs:
     name: Deploy over SSH
     needs: verify
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && secrets.SSH_HOST != ''
     steps:
       - name: Deploy on production VPS over SSH
         uses: appleboy/ssh-action@v1.2.0
