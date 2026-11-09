@@ -25,9 +25,13 @@ export async function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
 }
 
+type ProductPageProps = {
+  params: Promise<{ slug: string }>;
+};
+
 export async function generateMetadata({
   params,
-}: PageProps<"/collection/[slug]">) {
+}: ProductPageProps) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
@@ -47,7 +51,7 @@ function ProductFallback() {
 
 async function ProductDetail({
   params,
-}: Pick<PageProps<"/collection/[slug]">, "params">) {
+}: ProductPageProps) {
   const { slug } = await params;
   const [product, settings] = await Promise.all([
     getProductBySlug(slug),
@@ -206,7 +210,7 @@ async function ProductDetail({
 
 export default function ProductPage({
   params,
-}: PageProps<"/collection/[slug]">) {
+}: ProductPageProps) {
   return (
     <Suspense fallback={<ProductFallback />}>
       <ProductDetail params={params} />

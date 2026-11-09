@@ -20,13 +20,17 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+type CollectionPageProps = {
+  searchParams: Promise<CollectionSearchParams>;
+};
+
 function CollectionFallback() {
   return <CollectionResultsSkeleton />;
 }
 
 async function CollectionResults({
   searchParams,
-}: Pick<PageProps<"/collection">, "searchParams">) {
+}: CollectionPageProps) {
   const params = (await searchParams) as CollectionSearchParams;
   const filters = filtersFromSearchParams(params);
   const [products, options] = await Promise.all([
@@ -104,7 +108,7 @@ async function CollectionResults({
 
 export default async function CollectionPage({
   searchParams,
-}: PageProps<"/collection">) {
+}: CollectionPageProps) {
   const settings = await getSiteSettings();
 
   return (
