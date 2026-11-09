@@ -33,10 +33,10 @@ function FilterGroup({
 }: FilterGroupProps) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-foreground/50">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/60">
         {label}
       </p>
-      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+      <ul className="mt-2.5 flex flex-wrap gap-x-3 gap-y-2">
         {values.map((value) => {
           const isActive = activeValue === value;
           const href = buildCollectionHref(activeFilters, {
@@ -50,10 +50,10 @@ function FilterGroup({
                 prefetch={true}
                 onClick={onNavigate}
                 aria-current={isActive ? "true" : undefined}
-                className={`text-sm transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                className={`inline-block rounded-full px-3 py-1 font-mono text-xs transition-colors duration-200 ${
                   isActive
-                    ? "text-accent underline decoration-accent underline-offset-4"
-                    : "text-foreground/70 hover:text-accent"
+                    ? "border border-[#2B6CB0] bg-[#15181E] font-bold text-[#99CEFF] shadow-xs"
+                    : "border border-foreground/15 bg-background text-foreground/75 hover:border-accent hover:text-accent"
                 }`}
               >
                 {formatFilterLabel(value)}
@@ -72,7 +72,7 @@ function FilterSections({
   onNavigate,
 }: CollectionFiltersProps & { onNavigate?: () => void }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <FilterGroup
         label="Category"
         values={options.categories}
@@ -82,7 +82,7 @@ function FilterSections({
         onNavigate={onNavigate}
       />
       <FilterGroup
-        label="Gender"
+        label="Department"
         values={options.genders}
         activeValue={active.gender}
         activeFilters={active}
@@ -90,7 +90,7 @@ function FilterSections({
         onNavigate={onNavigate}
       />
       <FilterGroup
-        label="Frame shape"
+        label="Frame Shape"
         values={options.frameShapes}
         activeValue={active.frameShape}
         activeFilters={active}
@@ -128,39 +128,42 @@ export function CollectionFilters({ options, active }: CollectionFiltersProps) {
   return (
     <>
       {/* Desktop filter row */}
-      <div className="hidden border-b border-foreground/10 pb-8 md:block">
+      <div className="hidden border-b border-foreground/10 pb-6 md:block">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <FilterSections options={options} active={active} />
           {filtersActive ? (
             <Link
               href="/collection"
               prefetch={true}
-              className="shrink-0 text-sm text-foreground/60 transition-colors duration-200 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="shrink-0 rounded-full bg-[#15181E] px-3.5 py-1.5 font-mono text-[10px] font-bold text-[#F4F2EC] uppercase transition hover:bg-accent"
             >
-              Clear filters
+              Clear filters ✕
             </Link>
           ) : null}
         </div>
       </div>
 
       {/* Mobile filter trigger */}
-      <div className="flex items-center justify-between gap-4 border-b border-foreground/10 pb-5 md:hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-foreground/10 pb-4 md:hidden">
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-expanded={open}
           aria-controls={panelId}
-          className="inline-flex min-h-11 items-center border border-foreground/15 px-4 text-sm text-foreground transition-colors duration-200 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-foreground/20 bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground uppercase tracking-wider transition hover:border-accent hover:text-accent"
         >
-          Filter{filtersActive ? " · on" : ""}
+          <span>⚡ Filter Archive</span>
+          {filtersActive ? (
+            <span className="h-2 w-2 rounded-full bg-[#2B6CB0]" />
+          ) : null}
         </button>
         {filtersActive ? (
           <Link
             href="/collection"
             prefetch={true}
-            className="text-sm text-foreground/60 transition-colors duration-200 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="font-mono text-xs text-accent font-bold uppercase tracking-wider hover:underline"
           >
-            Clear
+            Clear All
           </Link>
         ) : null}
       </div>
@@ -171,7 +174,7 @@ export function CollectionFilters({ options, active }: CollectionFiltersProps) {
           <button
             type="button"
             aria-label="Close filters"
-            className="absolute inset-0 bg-foreground/30"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
           <div
@@ -179,20 +182,22 @@ export function CollectionFilters({ options, active }: CollectionFiltersProps) {
             role="dialog"
             aria-modal="true"
             aria-label="Filter collection"
-            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto border-t border-foreground/10 bg-background px-4 pb-8 pt-4"
+            className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-3xl border-t border-[#5AA2E6]/40 bg-[#F4F2EC] px-5 pb-8 pt-5 text-[#15181E] shadow-2xl"
           >
-            <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
-              <p className="font-display text-xl text-foreground">Filter</p>
+            <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 border-b border-[#15181E]/15 pb-3">
+              <p className="font-display text-xl font-bold text-[#15181E]">
+                Filter Archive
+              </p>
               <button
                 ref={closeRef}
                 type="button"
                 onClick={() => setOpen(false)}
-                className="min-h-11 px-2 text-sm text-foreground/70 transition-colors duration-200 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                className="rounded-full border border-[#15181E]/20 bg-background px-3 py-1 font-mono text-xs font-bold text-[#15181E] hover:bg-[#15181E] hover:text-white"
               >
-                Close
+                ✕ Close
               </button>
             </div>
-            <div className="mx-auto mt-8 w-full max-w-6xl">
+            <div className="mx-auto mt-6 w-full max-w-6xl">
               <FilterSections
                 options={options}
                 active={active}
@@ -203,9 +208,9 @@ export function CollectionFilters({ options, active }: CollectionFiltersProps) {
                   href="/collection"
                   prefetch={true}
                   onClick={() => setOpen(false)}
-                  className="mt-8 inline-block text-sm text-accent underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="mt-6 inline-block rounded-full bg-[#15181E] px-5 py-2 font-mono text-xs font-bold text-[#F4F2EC] uppercase"
                 >
-                  Clear filters
+                  Clear All Filters
                 </Link>
               ) : null}
             </div>

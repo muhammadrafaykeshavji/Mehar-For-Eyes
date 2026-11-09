@@ -6,7 +6,8 @@ type ProductImageProps = Omit<ImageProps, "src" | "alt"> & {
 };
 
 export function ProductImage({ src, alt, ...props }: ProductImageProps) {
-  const unoptimized = src.endsWith(".svg") || props.unoptimized;
+  const unoptimized =
+    src.endsWith(".svg") || src.startsWith("/uploads/") || props.unoptimized;
 
   return <Image src={src} alt={alt} {...props} unoptimized={unoptimized} />;
 }

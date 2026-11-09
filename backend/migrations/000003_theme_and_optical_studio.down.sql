@@ -1,0 +1,21 @@
+ALTER TABLE site_settings
+    DROP COLUMN IF EXISTS theme_preset,
+    DROP COLUMN IF EXISTS hero_layout,
+    DROP COLUMN IF EXISTS card_style,
+    DROP COLUMN IF EXISTS admin_theme,
+    DROP COLUMN IF EXISTS bg_color,
+    DROP COLUMN IF EXISTS surface_color,
+    DROP COLUMN IF EXISTS text_color,
+    DROP COLUMN IF EXISTS accent_color,
+    DROP COLUMN IF EXISTS hero_image_url,
+    DROP COLUMN IF EXISTS hero_badge,
+    DROP COLUMN IF EXISTS announcement_enabled,
+    DROP COLUMN IF EXISTS announcement_text,
+    DROP COLUMN IF EXISTS show_face_shape_guide,
+    DROP COLUMN IF EXISTS face_shape_heading,
+    DROP COLUMN IF EXISTS face_shape_subtitle,
+    DROP COLUMN IF EXISTS show_lens_guide,
+    DROP COLUMN IF EXISTS lens_guide_heading,
+    DROP COLUMN IF EXISTS lens_guide_subtitle,
+    DROP COLUMN IF EXISTS lens_options_json;
+

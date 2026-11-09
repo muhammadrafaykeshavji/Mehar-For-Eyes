@@ -1,0 +1,86 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Run Go vet & unit tests
+        working-directory: backend
+        run: |
+          go vet ./...
+          go test -v ./...
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run ESLint and TypeScript typecheck
+        run: |
+          npm run lint
+          npx tsc --noEmit
+
+  deploy:
+    name: Deploy over SSH
+    needs: verify
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy on production VPS over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH || '/opt/mehar-for-eyes' }}"
+            cd "${DEPLOY_PATH}"
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            docker compose -f docker-compose.prod.yml --env-file .env.prod build --pull
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
+
+            # Verify API health inside the compose network
+            for i in $(seq 1 20); do
+              if docker compose -f docker-compose.prod.yml --env-file .env.prod exec -T api wget -qO- http://127.0.0.1:8080/healthz >/dev/null 2>&1; then
+                echo "API is healthy."
+                break
+              fi
+              if [ "$i" -eq 20 ]; then
+                echo "ERROR: API failed healthcheck after deploy." >&2
+                exit 1
+              fi
+              sleep 2
+            done
+
+            docker image prune -f
+

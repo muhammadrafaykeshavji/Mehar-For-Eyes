@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
+import { CoutureBackgroundPrint } from "@/components/CoutureBackgroundPrint";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import LocalBusinessJsonLd from "@/components/LocalBusinessJsonLd";
+import { HomePageSkeleton } from "@/components/PageSkeletons";
+import { StoreChromeWrapper } from "@/components/StoreChromeWrapper";
+import { ThemeStyleInjector } from "@/components/ThemeStyleInjector";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import { getSiteSettings } from "@/lib/settings";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -20,34 +26,60 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: "Mehar for Eyes | Eyewear and optical shop",
-    template: "%s | Mehar for Eyes",
-  },
-  description: siteConfig.description,
-  openGraph: {
-    siteName: siteConfig.name,
-    type: "website",
-    locale: "en_PK",
-    // TODO — add an og image when real shop photos exist
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: {
+      default: `${settings.shopName} | Eyewear and optical shop`,
+      template: `%s | ${settings.shopName}`,
+    },
+    description: settings.metaDescription,
+    openGraph: {
+      siteName: settings.shopName,
+      type: "website",
+      locale: "en_PK",
+    },
+  };
+}
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const settings = await getSiteSettings();
+
   return (
     <html
       lang="en"
       className={`${fraunces.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <LocalBusinessJsonLd />
+        <ThemeStyleInjector settings={settings} />
         <Suspense fallback={null}>
-          <WhatsAppFloat />
+          <StoreChromeWrapper>
+            <CoutureBackgroundPrint
+              initialPrint={settings.bgPrint}
+              initialIntensity={settings.printIntensity}
+              themePreset={settings.themePreset}
+            />
+            <AnnouncementBar settings={settings} />
+            <Header />
+          </StoreChromeWrapper>
+        </Suspense>
+        <main className="relative z-10 flex-1">
+          <Suspense fallback={<HomePageSkeleton />}>{children}</Suspense>
+        </main>
+        <Suspense fallback={null}>
+          <StoreChromeWrapper>
+            <Footer />
+          </StoreChromeWrapper>
+        </Suspense>
+        <Suspense fallback={null}>
+          <LocalBusinessJsonLd />
+        </Suspense>
+        <Suspense fallback={null}>
+          <WhatsAppFloat
+            whatsappNumber={settings.whatsappNumber}
+            shopName={settings.shopName}
+          />
         </Suspense>
       </body>
     </html>

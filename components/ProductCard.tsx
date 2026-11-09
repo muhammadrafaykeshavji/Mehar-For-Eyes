@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Product } from "@/data/products";
+import type { Product } from "@/lib/products";
 import { ProductImage } from "@/components/ProductImage";
 
 type ProductCardProps = {

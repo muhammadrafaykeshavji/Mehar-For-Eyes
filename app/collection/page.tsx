@@ -1,25 +1,27 @@
-﻿import Link from "next/link";
+import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { CollectionFilters } from "@/components/CollectionFilters";
 import { CollectionProductCard } from "@/components/CollectionProductCard";
+import { CollectionResultsSkeleton } from "@/components/PageSkeletons";
 import {
   filtersFromSearchParams,
   hasActiveFilters,
   type CollectionSearchParams,
 } from "@/lib/collection-url";
 import { getFilterOptions, getProducts } from "@/lib/products";
+import { getSiteSettings } from "@/lib/settings";
 
-export const metadata = {
-  title: "Collection",
-  description: "Browse eyeglass frames, sunglasses and kids eyewear from Mehar for Eyes. Order on WhatsApp.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: settings.collectionHeading,
+    description: settings.collectionSubtitle,
+  };
+}
 
 function CollectionFallback() {
-  return (
-    <div className="mt-8 border-t border-foreground/10 pt-8">
-      <p className="text-sm text-foreground/60">Loading framesâ€¦</p>
-    </div>
-  );
+  return <CollectionResultsSkeleton />;
 }
 
 async function CollectionResults({
@@ -44,59 +46,82 @@ async function CollectionResults({
 
   return (
     <>
-      <div className="mt-8">
-        <CollectionFilters options={options} active={filters} />
+      {/* Filter Deck inside Off-White Printed Section */}
+      <div className="mx-auto w-full max-w-7xl px-4 pb-10 sm:px-8">
+        <div className="rounded-2xl border border-foreground/15 bg-[#DCE2EC]/90 p-5 shadow-sm backdrop-blur-md sm:p-6">
+          <CollectionFilters options={options} active={filters} />
+        </div>
       </div>
 
-      <p className="mt-6 text-sm text-foreground/65" aria-live="polite">
-        {countLabel}
-      </p>
+      {/* Alternating Light Cool Grey Section for Frame Archive Grid */}
+      <section className="border-t border-foreground/15 bg-[#DCE2EC]/90 py-12 backdrop-blur-[2px] sm:py-16">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-8">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-foreground/15 pb-4">
+            <p
+              className="font-mono text-xs font-semibold tracking-[0.16em] text-foreground/75 uppercase"
+              aria-live="polite"
+            >
+              ARCHIVE INDEX // {countLabel}
+            </p>
+            <span className="rounded-full bg-[#15181E] px-3 py-1 font-mono text-[10px] tracking-widest text-[#99CEFF] uppercase">
+              VIRTUAL TRY-ON &amp; DUAL ZOOM READY
+            </span>
+          </div>
 
-      {count === 0 ? (
-        <div className="mt-12 border border-foreground/10 px-6 py-14 text-center">
-          <p className="font-display text-xl text-foreground">
-            No frames match this filter
-          </p>
-          <p className="mt-3 text-sm text-foreground/65">
-            Try another shape, gender, or category.
-          </p>
-          <Link
-            href="/collection"
-            prefetch={true}
-            className="mt-6 inline-block text-sm text-accent underline-offset-4 transition-opacity duration-200 hover:underline hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            Clear filters
-          </Link>
+          {count === 0 ? (
+            <div className="rounded-2xl border border-foreground/15 bg-background/90 px-6 py-14 text-center">
+              <p className="font-display text-xl text-foreground">
+                No frames match this filter
+              </p>
+              <p className="mt-3 text-sm text-foreground/65">
+                Try another shape, gender, or category.
+              </p>
+              <Link
+                href="/collection"
+                prefetch={true}
+                className="mt-6 inline-block rounded-full bg-[#15181E] px-5 py-2 font-mono text-xs text-[#F4F2EC] uppercase transition hover:bg-accent"
+              >
+                Clear filters
+              </Link>
+            </div>
+          ) : (
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+              {products.map((product, index) => (
+                <li key={product.id}>
+                  <CollectionProductCard
+                    product={product}
+                    priority={index < 4}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      ) : (
-        <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
-          {products.map((product, index) => (
-            <li key={product.id}>
-              <CollectionProductCard
-                product={product}
-                priority={index < 4}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      </section>
     </>
   );
 }
 
-export default function CollectionPage({
+export default async function CollectionPage({
   searchParams,
 }: PageProps<"/collection">) {
+  const settings = await getSiteSettings();
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
-      <div className="max-w-xl">
-        <h1 className="font-display text-3xl tracking-tight text-foreground sm:text-4xl">
-          Collection
-        </h1>
-        <p className="mt-3 text-base leading-relaxed text-foreground/75">
-          Frames on the floor and ready to try. Filter by what you need, then
-          message us on WhatsApp.
-        </p>
+    <div>
+      {/* Section 1: Off-White Printed Header */}
+      <div className="mx-auto w-full max-w-7xl px-4 pt-10 pb-6 sm:px-8 sm:pt-14">
+        <div className="max-w-2xl">
+          <p className="font-mono text-[10.5px] font-semibold tracking-[0.22em] text-accent uppercase">
+            [ARCHIVE // OPTICAL &amp; SUN COLLECTION]
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            {settings.collectionHeading}
+          </h1>
+          <p className="mt-3 text-base leading-relaxed text-foreground/80">
+            {settings.collectionSubtitle}
+          </p>
+        </div>
       </div>
 
       <Suspense fallback={<CollectionFallback />}>

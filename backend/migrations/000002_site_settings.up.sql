@@ -1,0 +1,46 @@
+CREATE TABLE site_settings (
+    id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    shop_name TEXT NOT NULL DEFAULT 'Mehar for Eyes',
+    tagline TEXT NOT NULL DEFAULT 'Frames fitted in person. Orders over WhatsApp.',
+    meta_description TEXT NOT NULL DEFAULT 'Eyeglass frames, prescription lenses, sunglasses, and kids eyewear at Mehar for Eyes. Fitted in person or ordered over WhatsApp.',
+    whatsapp_number TEXT NOT NULL DEFAULT '923000000000',
+    phone_number TEXT NOT NULL DEFAULT '923000000000',
+    address_street TEXT NOT NULL DEFAULT 'Main Commercial Area',
+    address_city TEXT NOT NULL DEFAULT 'Lahore',
+    address_region TEXT NOT NULL DEFAULT 'Punjab',
+    address_country TEXT NOT NULL DEFAULT 'PK',
+    opening_hours TEXT NOT NULL DEFAULT 'Mon–Sat, 11:00 AM – 9:00 PM',
+    map_embed_url TEXT NOT NULL DEFAULT '',
+    map_caption TEXT NOT NULL DEFAULT 'Visit our shop for in-person frame fitting and prescription lens consultation.',
+    hero_title TEXT NOT NULL DEFAULT 'Mehar for Eyes',
+    hero_subtitle TEXT NOT NULL DEFAULT 'Frames fitted in the shop. Message us when you are ready to order.',
+    hero_primary_cta TEXT NOT NULL DEFAULT 'Browse collection',
+    hero_secondary_cta TEXT NOT NULL DEFAULT 'Order on WhatsApp',
+    featured_heading TEXT NOT NULL DEFAULT 'Featured frames',
+    featured_subheading TEXT NOT NULL DEFAULT 'Four from the current shelf.',
+    categories_heading TEXT NOT NULL DEFAULT 'Shop by category',
+    categories_subheading TEXT NOT NULL DEFAULT 'Jump straight to the shelf you need.',
+    why_heading TEXT NOT NULL DEFAULT 'Why Mehar for Eyes',
+    why_point_1 TEXT NOT NULL DEFAULT 'Every frame is checked for bridge fit, temple length, and optical alignment before it leaves the counter.',
+    why_point_2 TEXT NOT NULL DEFAULT 'Single-vision, blue-cut, photochromic, and progressive prescription lenses cut and mounted in-house.',
+    why_point_3 TEXT NOT NULL DEFAULT 'Send your prescription or frame choice on WhatsApp for quick pricing, availability, and doorstep delivery.',
+    visit_heading TEXT NOT NULL DEFAULT 'Visit us',
+    collection_heading TEXT NOT NULL DEFAULT 'Collection',
+    collection_subtitle TEXT NOT NULL DEFAULT 'Frames on the floor and ready to try. Filter by what you need, then message us on WhatsApp.',
+    about_heading TEXT NOT NULL DEFAULT 'About the shop',
+    about_intro TEXT NOT NULL DEFAULT 'Mehar for Eyes is an optical practice focused on well-fitted frames, accurate lens dispensing, and straightforward advice.',
+    story_heading TEXT NOT NULL DEFAULT 'Our story',
+    story_paragraph_1 TEXT NOT NULL DEFAULT 'We built Mehar for Eyes around a simple principle: eyeglasses should fit comfortably all day and match your prescription without guesswork.',
+    story_paragraph_2 TEXT NOT NULL DEFAULT 'Whether you visit our counter in person or message us on WhatsApp with your prescription, the same opticians handle frame selection, lens fitting, and aftercare adjustments.',
+    offer_heading TEXT NOT NULL DEFAULT 'What we offer',
+    offer_items TEXT[] NOT NULL DEFAULT ARRAY[
+        'Eyeglass frames: acetate, titanium, stainless steel, and rimless frames across everyday and statement shapes.',
+        'Prescription lenses: single vision, bifocal, progressive, anti-reflective, and photochromic options.',
+        'Sunglasses: UV-400 polarized and prescription-ready sun frames for men and women.',
+        'Kids eyewear: flexible, impact-resistant frames sized for growing faces.'
+    ],
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+

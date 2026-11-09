@@ -1,125 +1,131 @@
+import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { CategoryTile } from "@/components/CategoryTile";
+import { FaceShapeFinder } from "@/components/FaceShapeFinder";
 import { FadeIn } from "@/components/FadeIn";
 import { FeaturedFrameCard } from "@/components/FeaturedFrameCard";
-import { ProductImage } from "@/components/ProductImage";
+import { HeroShowcase } from "@/components/HeroShowcase";
+import { LensGuideSection } from "@/components/LensGuideSection";
 import { getFeatured, getProducts } from "@/lib/products";
-import {
-  getShopTelHref,
-  tryBuildWhatsAppLink,
-} from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/settings";
+import { getShopTelHref, tryBuildWhatsAppLink } from "@/lib/whatsapp";
 
 export default async function HomePage() {
-  const [featuredAll, men, women, kids, sunglasses] = await Promise.all([
-    getFeatured(),
-    getProducts({ gender: "men" }),
-    getProducts({ gender: "women" }),
-    getProducts({ gender: "kids" }),
-    getProducts({ category: "sunglasses" }),
-  ]);
+  "use cache";
+  cacheLife({ revalidate: 60, stale: 60, expire: 3600 });
+  cacheTag("settings", "products");
 
-  const featured = featuredAll.slice(0, 4);
-  const heroProduct = featured[0] ?? null;
-  const heroImage = heroProduct?.images[0];
+  const [settings, featuredAll, allProducts, men, women, kids, sunglasses] =
+    await Promise.all([
+      getSiteSettings(),
+      getFeatured(),
+      getProducts(),
+      getProducts({ gender: "men" }),
+      getProducts({ gender: "women" }),
+      getProducts({ gender: "kids" }),
+      getProducts({ category: "sunglasses" }),
+    ]);
+
+  const featured =
+    featuredAll.length > 0 ? featuredAll.slice(0, 4) : allProducts.slice(0, 4);
 
   const whatsappHref = tryBuildWhatsAppLink(
-    "Hi Mehar for Eyes — I'd like to ask about frames.",
+    `Hi ${settings.shopName} — I'd like to ask about frames.`,
+    settings.whatsappNumber,
   );
-  const telHref = getShopTelHref();
+  const telHref = getShopTelHref(
+    settings.phoneNumber || settings.whatsappNumber,
+  );
+
+  const fullAddress = [
+    settings.addressStreet,
+    settings.addressCity,
+    settings.addressRegion,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   const categories = [
     {
       label: "Men",
       href: "/collection?gender=men",
-      product: men[0] ?? null,
+      product: men[0] ?? allProducts[2] ?? null,
     },
     {
       label: "Women",
       href: "/collection?gender=women",
-      product: women[0] ?? null,
+      product: women[0] ?? allProducts[3] ?? null,
     },
     {
       label: "Kids",
       href: "/collection?gender=kids",
-      product: kids[0] ?? null,
+      product: kids[0] ?? allProducts[1] ?? null,
     },
     {
       label: "Sunglasses",
       href: "/collection?category=sunglasses",
-      product: sunglasses[0] ?? null,
+      product: sunglasses[0] ?? allProducts[0] ?? null,
     },
   ] as const;
 
+  const whyPoints = [
+    {
+      num: "01",
+      tag: "ANATOMICAL CALIBRATION",
+      text: settings.whyPoint1,
+    },
+    {
+      num: "02",
+      tag: "IN-HOUSE DIGITAL LAB",
+      text: settings.whyPoint2,
+    },
+    {
+      num: "03",
+      tag: "DIRECT WHATSAPP DISPENSING",
+      text: settings.whyPoint3,
+    },
+  ];
+
   return (
     <div>
-      {/* 1. Hero */}
-      <section className="border-b border-foreground/10">
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:py-20">
-          <div className="order-1">
-            <h1 className="font-display text-[2.5rem] leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Mehar for Eyes
-            </h1>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-foreground/75 sm:text-lg">
-              Frames fitted in the shop. Message us when you are ready to order.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link
-                href="/collection"
-                className="inline-flex min-h-11 items-center justify-center border border-accent bg-accent px-5 py-2.5 text-sm text-background transition-opacity duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              >
-                Browse collection
-              </Link>
-              {whatsappHref ? (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center justify-center border border-foreground/15 px-5 py-2.5 text-sm text-foreground transition-colors duration-200 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  Order on WhatsApp
-                </a>
-              ) : (
-                <span className="inline-flex min-h-11 items-center border border-foreground/10 px-5 py-2.5 text-sm text-foreground/45">
-                  Order on WhatsApp
-                </span>
-              )}
+      {/* 1. Interactive Editorial Hero Stage */}
+      <HeroShowcase
+        settings={settings}
+        featured={featured}
+        whatsappHref={whatsappHref}
+      />
+
+      {/* 2. Curated Archive Featured Frames (Alternating Light Cool Grey Section) */}
+      <section className="border-b border-foreground/15 bg-[#DCE2EC]/90 backdrop-blur-[2px]">
+        <FadeIn className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8 lg:py-24">
+          <div className="mb-10 flex flex-col justify-between gap-4 border-b border-foreground/15 pb-6 sm:flex-row sm:items-end">
+            <div>
+              <p className="font-mono text-[11px] font-semibold tracking-[0.22em] text-accent uppercase">
+                [01] CURATED ARCHIVE // SEASON EDIT
+              </p>
+              <h2 className="mt-2 font-display text-3xl tracking-tight text-foreground sm:text-5xl">
+                {settings.featuredHeading}
+              </h2>
+              <p className="mt-2 text-sm text-foreground/70">
+                {settings.featuredSubheading}
+              </p>
             </div>
+            <Link
+              href="/collection"
+              className="inline-flex items-center gap-2 border border-foreground/20 bg-surface px-5 py-2.5 font-mono text-xs font-semibold tracking-wider text-foreground uppercase transition hover:border-accent hover:text-accent"
+              style={{ borderRadius: "var(--radius-btn)" }}
+            >
+              <span>Inspect Full Archive ({allProducts.length})</span>
+              <span>→</span>
+            </Link>
           </div>
 
-          <div className="order-2 flex justify-center lg:justify-end">
-            <div className="relative aspect-square w-[min(100%,20rem)] overflow-hidden rounded-full border border-foreground/10 bg-[#EDE6DC] sm:w-[min(100%,24rem)] lg:w-[min(100%,28rem)]">
-              {heroImage && heroProduct ? (
-                <ProductImage
-                  src={heroImage}
-                  alt={`${heroProduct.name} by ${heroProduct.brand}`}
-                  fill
-                  sizes="(max-width: 640px) 80vw, 28rem"
-                  className="object-cover"
-                  priority
-                />
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. Featured frames */}
-      <section className="border-b border-foreground/10">
-        <FadeIn className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <div className="mb-8 sm:mb-10">
-            <h2 className="font-display text-2xl tracking-tight text-foreground sm:text-3xl">
-              Featured frames
-            </h2>
-            <p className="mt-2 text-sm text-foreground/70">
-              Four from the current shelf.
-            </p>
-          </div>
-
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
+          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((product, index) => (
               <li key={product.id}>
                 <FeaturedFrameCard
                   product={product}
+                  index={index}
                   priority={index < 2}
                 />
               </li>
@@ -128,25 +134,41 @@ export default async function HomePage() {
         </FadeIn>
       </section>
 
-      {/* 3. Shop by category */}
-      <section className="border-b border-foreground/10">
-        <FadeIn className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <div className="mb-8 sm:mb-10">
-            <h2 className="font-display text-2xl tracking-tight text-foreground sm:text-3xl">
-              Shop by category
+      {/* 3. Interactive Face Shape & Anatomical Fit Studio */}
+      {settings.showFaceShapeGuide ? (
+        <FaceShapeFinder
+          heading={settings.faceShapeHeading}
+          subtitle={settings.faceShapeSubtitle}
+          products={allProducts}
+        />
+      ) : null}
+
+      {/* 4. Interactive Optical Lab & Coating Simulator */}
+      <LensGuideSection settings={settings} />
+
+      {/* 5. Department Lookbook Grid */}
+      <section className="border-b border-foreground/15">
+        <FadeIn className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8 lg:py-24">
+          <div className="mb-10 border-b border-foreground/15 pb-6">
+            <p className="font-mono text-[11px] font-semibold tracking-[0.22em] text-accent uppercase">
+              [04] DEPARTMENTS // SILHOUETTE INDEX
+            </p>
+            <h2 className="mt-2 font-display text-3xl tracking-tight text-foreground sm:text-5xl">
+              {settings.categoriesHeading}
             </h2>
             <p className="mt-2 text-sm text-foreground/70">
-              Jump straight to the shelf you need.
+              {settings.categoriesSubheading}
             </p>
           </div>
 
-          <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
-            {categories.map((category) => (
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.map((category, idx) => (
               <li key={category.label}>
                 <CategoryTile
                   label={category.label}
                   href={category.href}
                   product={category.product}
+                  index={idx}
                 />
               </li>
             ))}
@@ -154,105 +176,150 @@ export default async function HomePage() {
         </FadeIn>
       </section>
 
-      {/* 4. Why Mehar for Eyes */}
-      <section className="border-b border-foreground/10">
-        <FadeIn className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <h2 className="font-display text-2xl tracking-tight text-foreground sm:text-3xl">
-            Why Mehar for Eyes
-          </h2>
+      {/* 6. The Mehar Optical Standard (Alternating Light Cool Grey Section) */}
+      <section className="border-b border-foreground/15 bg-[#DCE2EC]/90 backdrop-blur-[2px]">
+        <FadeIn className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8 lg:py-24">
+          <div className="mb-10 border-b border-foreground/15 pb-6">
+            <p className="font-mono text-[11px] font-semibold tracking-[0.22em] text-accent uppercase">
+              [05] CRAFT &amp; CLINICAL PRECISION
+            </p>
+            <h2 className="mt-2 font-display text-3xl tracking-tight text-foreground sm:text-5xl">
+              {settings.whyHeading}
+            </h2>
+          </div>
 
-          <ol className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
-            <li>
-              <p className="font-display text-3xl text-accent sm:text-4xl">
-                01
-              </p>
-              <p className="mt-3 text-base leading-relaxed text-foreground/80">
-                TODO — Replace with a real fact about how long the shop has
-                served this area, or who fits the frames.
-              </p>
-            </li>
-            <li>
-              <p className="font-display text-3xl text-accent sm:text-4xl">
-                02
-              </p>
-              <p className="mt-3 text-base leading-relaxed text-foreground/80">
-                TODO — Replace with a real fact about lens work, brands carried,
-                or what a typical visit includes.
-              </p>
-            </li>
-            <li>
-              <p className="font-display text-3xl text-accent sm:text-4xl">
-                03
-              </p>
-              <p className="mt-3 text-base leading-relaxed text-foreground/80">
-                TODO — Replace with a real fact about WhatsApp orders, repair
-                turnaround, or aftercare.
-              </p>
-            </li>
+          <ol className="grid gap-6 lg:grid-cols-3">
+            {whyPoints.map((point) => (
+              <li
+                key={point.num}
+                className="relative flex flex-col justify-between border border-foreground/15 bg-surface p-7 sm:p-9"
+                style={{ borderRadius: "var(--radius-card)" }}
+              >
+                <div className="flex items-center justify-between border-b border-foreground/10 pb-4">
+                  <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-accent uppercase">
+                    {point.tag}
+                  </span>
+                  <span className="font-display text-3xl text-accent">
+                    {point.num}
+                  </span>
+                </div>
+                <p className="mt-6 text-base leading-relaxed text-foreground/85 sm:text-lg">
+                  {point.text}
+                </p>
+              </li>
+            ))}
           </ol>
         </FadeIn>
       </section>
 
-      {/* 5. Visit us */}
+      {/* 7. Flagship Studio Location & Appointment Desk */}
       <section>
-        <FadeIn className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <h2 className="font-display text-2xl tracking-tight text-foreground sm:text-3xl">
-            Visit us
-          </h2>
+        <FadeIn className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-8 lg:py-24">
+          <div className="mb-10 border-b border-foreground/15 pb-6">
+            <p className="font-mono text-[11px] font-semibold tracking-[0.22em] text-accent uppercase">
+              [06] PRIVATE FITTING &amp; CONSULTATION
+            </p>
+            <h2 className="mt-2 font-display text-3xl tracking-tight text-foreground sm:text-5xl">
+              {settings.visitHeading}
+            </h2>
+          </div>
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-2 lg:gap-12">
-            <div>
-              <p className="text-sm font-medium text-foreground">Address</p>
-              <p className="mt-2 text-base leading-relaxed text-foreground/75">
-                {/* TODO: Replace with the real shop address */}
-                TODO — Street address, area, city
-              </p>
+          <div className="grid gap-8 lg:grid-cols-12">
+            <div
+              className="flex flex-col justify-between border border-foreground/15 bg-surface p-7 sm:p-10 lg:col-span-5"
+              style={{ borderRadius: "var(--radius-card)" }}
+            >
+              <div className="space-y-6">
+                <div>
+                  <p className="font-mono text-[10px] font-semibold tracking-[0.2em] text-accent uppercase">
+                    ATELIER ADDRESS
+                  </p>
+                  <p className="mt-2 font-display text-2xl text-foreground">
+                    {fullAddress}
+                  </p>
+                </div>
 
-              <p className="mt-6 text-sm font-medium text-foreground">Hours</p>
-              <p className="mt-2 text-base leading-relaxed text-foreground/75">
-                {/* TODO: Replace with real opening hours */}
-                TODO — Day–Day, 00:00–00:00
-              </p>
+                <div className="border-t border-foreground/10 pt-5">
+                  <p className="font-mono text-[10px] font-semibold tracking-[0.2em] text-accent uppercase">
+                    DISPENSING HOURS
+                  </p>
+                  <p className="mt-2 font-mono text-sm text-foreground/80">
+                    {settings.openingHours}
+                  </p>
+                </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+                <div className="border-t border-foreground/10 pt-5">
+                  <p className="font-mono text-[10px] font-semibold tracking-[0.2em] text-accent uppercase">
+                    SERVICES AVAILABLE
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-foreground/70">
+                    In-person bridge &amp; temple calibration · Computerized eye
+                    testing · Same-day blue-cut &amp; prescription lens mounting.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3 border-t border-foreground/10 pt-6">
                 {telHref ? (
                   <a
                     href={telHref}
-                    className="inline-flex min-h-11 items-center justify-center border border-accent bg-accent px-5 py-2.5 text-sm text-background transition-opacity duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    className="inline-flex min-h-11 items-center justify-center border border-accent bg-accent px-6 py-2.5 font-mono text-xs font-bold tracking-wider text-background uppercase transition hover:opacity-90"
+                    style={{ borderRadius: "var(--radius-btn)" }}
                   >
-                    Call
+                    Call Optical Desk
                   </a>
-                ) : (
-                  <span className="inline-flex min-h-11 items-center border border-foreground/10 px-5 py-2.5 text-sm text-foreground/45">
-                    Call
-                  </span>
-                )}
+                ) : null}
                 {whatsappHref ? (
                   <a
                     href={whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center border border-foreground/15 px-5 py-2.5 text-sm text-foreground transition-colors duration-200 hover:border-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    className="inline-flex min-h-11 items-center justify-center border border-foreground/20 bg-background px-6 py-2.5 font-mono text-xs font-semibold tracking-wider text-foreground uppercase transition hover:border-accent hover:text-accent"
+                    style={{ borderRadius: "var(--radius-btn)" }}
                   >
-                    WhatsApp
+                    WhatsApp Directions &amp; Rx ↗
                   </a>
-                ) : (
-                  <span className="inline-flex min-h-11 items-center border border-foreground/10 px-5 py-2.5 text-sm text-foreground/45">
-                    WhatsApp
-                  </span>
-                )}
+                ) : null}
               </div>
             </div>
 
-            <div
-              className="flex min-h-56 items-center justify-center border border-foreground/10 bg-[#EDE6DC] sm:min-h-72"
-              aria-label="Map placeholder"
-            >
-              <p className="px-4 text-center text-sm text-foreground/55">
-                {/* TODO: Embed shop map */}
-                TODO — Map goes here
-              </p>
-            </div>
+            {settings.mapEmbedUrl ? (
+              <div
+                className="min-h-80 overflow-hidden border border-foreground/15 bg-surface lg:col-span-7"
+                style={{ borderRadius: "var(--radius-card)" }}
+              >
+                <iframe
+                  src={settings.mapEmbedUrl}
+                  title={`${settings.shopName} location map`}
+                  className="h-full min-h-80 w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            ) : (
+              <div
+                className="relative flex min-h-80 flex-col justify-between overflow-hidden border border-foreground/15 bg-surface p-8 lg:col-span-7"
+                style={{ borderRadius: "var(--radius-card)" }}
+                aria-label="Shop location note"
+              >
+                <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-accent uppercase">
+                  <span>COORDINATES // 31.5204° N, 74.3587° E</span>
+                  <span>LAHORE, PK</span>
+                </div>
+                <div className="my-auto max-w-lg">
+                  <p className="font-display text-2xl leading-snug text-foreground sm:text-3xl">
+                    {settings.mapCaption || fullAddress}
+                  </p>
+                  <p className="mt-3 font-mono text-xs text-foreground/55 uppercase">
+                    WALK-INS WELCOME · OR SEND YOUR PRESCRIPTION ON WHATSAPP FOR
+                    DOORSTEP DISPATCH
+                  </p>
+                </div>
+                <div className="border-t border-foreground/10 pt-4 font-mono text-[10px] tracking-widest text-foreground/45 uppercase">
+                  {fullAddress}
+                </div>
+              </div>
+            )}
           </div>
         </FadeIn>
       </section>
